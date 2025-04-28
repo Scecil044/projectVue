@@ -1,6 +1,6 @@
 <template>
   <div class="Users">
-    <Table :data="users" :columns="columns" />
+    <Table :data="users" :columns="columns" @delete="handleDelete" @view="handleView" @edit="handleEdit" />
     <button @click="toggleDeleteModal = true">Delete modal</button>
     <DeleteModal
       v-if="toggleDeleteModal"
@@ -69,6 +69,12 @@ const toggleDeleteModal = ref(false);
 
 const handleDelete = async () => {
   console.log("handling delete user function");
+};
+const handleView = async (user) => {
+  console.log("handling view user function", user);
+};
+const handleEdit = async (user) => {
+  console.log("handling edit user function", user);
 };
 </script>
 

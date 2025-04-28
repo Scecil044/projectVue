@@ -6,6 +6,8 @@ import AdminLayout from "../layouts/AdminLayout.vue";
 import GuestLayout from "../layouts/GuestLayout.vue";
 import Users from "../pages/users/Users.vue";
 import Dashboard from "../pages/Dashboard.vue";
+import Settings from "../pages/settings/Settings.vue";
+import User from "../pages/users/User.vue";
 
 const routes =[
     {
@@ -35,9 +37,19 @@ const routes =[
                 component:Users,
             },
             {
+                path:"user/:userId",
+                name:"User",
+                component:User,
+            },
+            {
                 path:"dashboard",
                 name:"Dashboard",
                 component:Dashboard,
+            },
+            {
+                path:"settings",
+                name:"Settings",
+                component:Settings,
             },
         ]
     },

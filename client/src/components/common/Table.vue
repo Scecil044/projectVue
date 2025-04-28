@@ -1,7 +1,7 @@
 <template>
   <div class="Table overflow-x-auto">
-    <table class="w-full table-auto border-collapse">
-      <thead class="bg-gray-400">
+    <table class="w-full table-auto border-collapse text-sm">
+      <thead class="">
         <tr>
           <th
             v-for="column in columns"
@@ -17,7 +17,7 @@
         <tr
           v-for="(item, index) in data"
           :key="item._id"
-          :class="['border-b', index % 2 === 1 ? 'bg-blue-50' : '']"
+          :class="['border-b', index % 2 === 1 ? '' : '']"
         >
           <td v-for="column in columns" :key="column.key" class="p-2">
             {{ item[column.key] }}

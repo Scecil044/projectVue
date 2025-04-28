@@ -1,15 +1,14 @@
 <template>
-  <div class="AdminLayout">
+  <div class="AdminLayout min-h-screen">
     <div class="flex w-full">
       <Sidebar/>
       <main class="w-full">
         <Header/>
-        <section>
-          <slot/>
+        <section class="p-6">  <!-- Added padding and background -->
+          <RouterView></RouterView>
         </section>
       </main>
     </div>
-    
   </div>
 </template>
 
