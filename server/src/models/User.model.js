@@ -3,6 +3,7 @@ const { paginate } = require("./paginate");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const config = require("../config/config");
+const { tokenTypes } = require("../config/tokenTypes");
 
 const userSchema = new mongoose.Schema(
   {
@@ -63,6 +64,35 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    firstLogin: {
+      type: Boolean,
+      default: true
+    },
+    lastLogin: {
+      type: Date,
+      default: Date.now
+    },
+    userStatus:{
+        type: String,
+        enum: ["active", "inactive", "suspended"],
+        default: "inactive"
+    },
+    isVerified:{
+        type: Boolean,
+        default: false
+    },
+    is_deleted: {
+        type: Boolean,
+        default: false
+    },
+    updatedBy:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+    deletedBy:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }
   },
   { timestamps: true }
 );
