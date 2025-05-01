@@ -30,6 +30,7 @@
     
     <!-- Credentials Login Form -->
     <form v-if="authMethod === 'credentials'" @submit.prevent="handleLogin" class="space-y-6">
+      <h1 class="text-black">{{ userStore.user ? userStore.user : "Not logged in" }}</h1>
       <!-- Email Field -->
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
@@ -41,7 +42,7 @@
             autocomplete="email" 
             required 
             v-model="formData.email"
-            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
             placeholder="Enter your email"
           />
         </div>
@@ -58,7 +59,7 @@
             autocomplete="current-password" 
             required 
             v-model="formData.password"
-            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
             placeholder="Enter your password"
           />
           <button 
@@ -234,6 +235,7 @@
 </template>
 
 <script setup>
+
 import { useRouter } from "vue-router";
 import { useUserStore } from "../../store/userStore";
 import { ref, inject, onUnmounted } from "vue";
@@ -302,8 +304,8 @@ const validateFormData = () => {
   }
   
   // Password validation - at least 6 characters
-  if (formData.value.password.length < 6) {
-    setError("Password must be at least 6 characters long.");
+  if (!formData.value.password) {
+    setError("A password is required.");
     return false;
   }
   
@@ -331,12 +333,16 @@ const validateOtpCode = () => {
 // Handle credentials login
 const handleLogin = async () => {
   try {
-    if (!validateFormData()) return;
+    console.log("handling login")
+    if (!validateFormData()) {
+      console.log("error validating form")
+      return
+    };
     
     loading.value = true;
     setError(null);
     
-    const res = await fetch(`/api/users/login`, {
+    const res = await fetch(`${import.meta.env.VITE_SERVER_API_URL}/api/users/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -349,7 +355,8 @@ const handleLogin = async () => {
     
     const data = await res.json();
     
-    if (data.status === 200 || data.statusCode === 200) {
+    if (data && typeof data === "object") {
+      console.log("status is 200")
       handleSuccessfulLogin(data, rememberMe.value);
     } else {
       loading.value = false;
@@ -416,6 +423,7 @@ const handleOtpRequest = async () => {
       const data = await res.json();
       
       if (data.status === 200 || data.statusCode === 200) {
+        debugger
         handleSuccessfulLogin(data, otpData.value.rememberMe);
       } else {
         otpLoading.value = false;
@@ -467,17 +475,18 @@ const resendOtp = async () => {
 
 // Common function to handle successful login for both methods
 const handleSuccessfulLogin = (data, rememberMe) => {
+  console.log("handling successful login")
   userStore.setUser(data);
   
   // Handle remember me functionality
   if (rememberMe) {
     // Store tokens in localStorage
-    localStorage.setItem("token", data.token.access);
-    localStorage.setItem("refreshToken", data.token.refresh);
+    localStorage.setItem("token", data.tokens.accessToken.token);
+    localStorage.setItem("refreshToken", data.tokens.refreshToken.token);
   } else {
     // Use session storage instead
-    sessionStorage.setItem("token", data.token.access);
-    sessionStorage.setItem("refreshToken", data.token.refresh);
+    sessionStorage.setItem("token", data.tokens.accessToken.token);
+    sessionStorage.setItem("refreshToken", data.tokens.refreshToken.token);
     
     // Clear localStorage tokens
     localStorage.removeItem("token");
@@ -492,3 +501,10 @@ const handleSuccessfulLogin = (data, rememberMe) => {
   router.push({ name: "Dashboard" });
 };
 </script>
+<style scoped>
+
+.success-message {
+  background-color: #D1FAE5; /* Light green */
+  color: #047857; /* Dark green */
+}
+</style>

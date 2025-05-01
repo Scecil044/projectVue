@@ -8,6 +8,9 @@ import Users from "../pages/users/Users.vue";
 import Dashboard from "../pages/Dashboard.vue";
 import Settings from "../pages/settings/Settings.vue";
 import User from "../pages/users/User.vue";
+import { useUserStore} from "../store/userStore";
+
+
 
 const routes =[
     {
@@ -79,14 +82,16 @@ const router = createRouter({
     routes,
 })
 
-// router.beforeEach((to, from, next) => {
-//     if (to.meta.requiresAuth && !localStorage.getItem("token")) {
-//         next({ name: "Login" });
-//     } else if (!to.meta.requiresAuth && localStorage.getItem("token")) {
-//         next({ name: "Home" });
-//     } else {
-//         next();
-//     }
-// });
+router.beforeEach((to, from, next) => {
+    
+    const userStore = useUserStore();
+    if (to.meta.requiresAuth && !userStore.accessToken) {
+        next({ name: "Login" });
+    } else if (!to.meta.requiresAuth && userStore.accessToken) {
+        next({ name: "Dashboard" });
+    } else {
+        next();
+    }
+});
 
 export default router;

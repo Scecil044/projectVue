@@ -1,28 +1,30 @@
-import { defineStore} from "pinia";
-import {ref} from "vue";
+import { defineStore } from "pinia";
 
-export const useUserStore = defineStore("user", ()=>{
-    const user = ref(null);
-    const accessToken = ref(null);
-    const refreshToken = ref(null);
+export const useUserStore = defineStore("user", {
+    state: () => ({
+        user: null,
+        accessToken: localStorage.getItem("token") || sessionStorage.getItem("token") || null,
+        refreshToken: localStorage.getItem("refreshToken") || sessionStorage.getItem("refreshToken") || null
+    }),
+    
+    actions: {
+        setUser(payload) {
+            this.user = payload.user;
+            this.accessToken = payload.tokens.accessToken.token;
+            this.refreshToken = payload.tokens.refreshToken.token;
+        },
+        
+        removeUser() {
+            this.user = null;
+            this.accessToken = null;
+            this.refreshToken = null;
+            // Clear stored tokens
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
+            sessionStorage.removeItem("token");
+            sessionStorage.removeItem("refreshToken");
+        }
+    },
 
-    const setUser = (payload)=>{
-        user.value = payload.user;
-        accessToken.value = payload.token.access;
-        refreshToken.value = payload.token.refresh;
-    }
-
-    const removeUser = ()=>{
-        user.value = null;
-        accessToken.value = null;
-        refreshToken.value = null;
-    }
-   
-    return {
-        user,
-        accessToken,
-        refreshToken,
-        setUser,
-        removeUser
-    }
+    persist: true
 });

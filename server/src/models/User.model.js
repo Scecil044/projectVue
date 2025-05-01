@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
 const { paginate } = require("./paginate");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const config = require("../config/config");
 const { tokenTypes } = require("../config/tokenTypes");
+const moment = require("moment");
+const Token = require("./Token.model");
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,7 +21,7 @@ const userSchema = new mongoose.Schema(
     },
     middleName: {
       type: String,
-      required: true,
+      // required: true,
       trim: true
     },
     lastName: {
@@ -46,23 +48,24 @@ const userSchema = new mongoose.Schema(
     },
     address: {
       type: String,
-      required: true,
+      // required: true,
       trim: true
     },
     city: {
       type: String,
-      required: true,
+      // required: true,
       trim: true
     },
     state: {
       type: String,
-      required: true,
+      // required: true,
       trim: true
     },
     country: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+      default: "Kenya"
     },
     firstLogin: {
       type: Boolean,
@@ -101,10 +104,52 @@ userSchema.plugin(paginate);
 
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
-  const token = jwt.sign({ _id: user._id.toString() }, config.jwtSecret, {
-    expiresIn: "7d"
+  
+  // Create moment objects for expiration times
+  const accessTokenExpiresTime = moment().add(config.jwt.accessExpirationMinutes, "minutes");
+  const refreshTokenExpiresTime = moment().add(config.jwt.refreshExpirationDays, "days");
+  
+  // Get Unix timestamps for token payloads
+  const accessTokenExpires = accessTokenExpiresTime.unix();
+  const refreshTokenExpires = refreshTokenExpiresTime.unix();
+  
+  const accessTokenPayload = {
+    _id: user._id,
+    role: user.role,
+    email: user.email,
+    type: tokenTypes.ACCESS,
+    exp: accessTokenExpires,
+  }
+  
+  const accessToken = jwt.sign(accessTokenPayload, config.jwt.secret);
+  
+  const refreshTokenPayload = {
+    _id: user._id,
+    role: user.role,
+    email: user.email,
+    type: tokenTypes.REFRESH,
+    exp: refreshTokenExpires,
+  }
+  
+  const refreshToken = jwt.sign(refreshTokenPayload, config.jwt.secret);
+  
+  await Token.create({
+    token: refreshToken, 
+    type: tokenTypes.REFRESH, 
+    user: user._id, 
+    expires: refreshTokenExpiresTime.toDate() // Use the moment object here
   });
-  return token;
+  
+  return {
+    accessToken: {
+      token: accessToken,
+      expires: accessTokenExpiresTime.toDate() // Use the moment object here
+    },
+    refreshToken: {
+      token: refreshToken,
+      expires: refreshTokenExpiresTime.toDate() // Use the moment object here
+    }
+  }
 }
 userSchema.pre("save", async function(next){
     const user = this;

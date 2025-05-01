@@ -8,6 +8,8 @@
       @closeDeleteModal="toggleDeleteModal = false"
       @handleDelete="handleDelete"
     />
+
+    <UserDrawer  v-model="showUserDrawer"/>
   </div>
 </template>
 
@@ -15,6 +17,7 @@
 import { ref } from "vue";
 import DeleteModal from "../../components/common/DeleteModal.vue";
 import Table from "../../components/common/Table.vue";
+import UserDrawer from "../../components/common/users/UserDrawer.vue";
 const users = [
   {
     firstName: "Johnstone",
@@ -65,6 +68,7 @@ const columns =[
     label:"ID"
   },
 ]
+const showUserDrawer = ref(false);
 const toggleDeleteModal = ref(false);
 
 const handleDelete = async () => {

@@ -5,9 +5,10 @@ import axios from "axios";
 import App from './App.vue';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import router from './routes';
+import PrimeVue from 'primevue/config';
 
 // Base URL for API requests
-axios.defaults.baseURL = "http://127.0.0.1:8000/api";
+axios.defaults.baseURL = "http://localhost:4500";
 
 // Get token from localStorage or sessionStorage (if remember me was not checked)
 const getToken = () => {
@@ -26,6 +27,7 @@ pinia.use(piniaPluginPersistedstate);
 
 // Create and mount app
 const app = createApp(App);
-app.use(router);
 app.use(pinia);
+app.use(router);
+app.use(PrimeVue);
 app.mount('#app');
